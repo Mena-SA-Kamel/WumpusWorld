@@ -29,7 +29,7 @@ class WumpusWorld:
         self.terminate_game = False
         self.num_actions = 0
         self.create_game_canvas()
-        self.visualize_game_canvas()
+        # self.visualize_game_canvas()
     
     def create_game_canvas(self):
         self.canvas = np.tile("", (self.height, self.width)).tolist()
@@ -54,10 +54,13 @@ class WumpusWorld:
                     self.pit_locations.append((x, y))
 
     def visualize_game_canvas(self):
+        self.canvas = np.tile("", (self.height, self.width)).tolist()
         for x in range(self.width):
             for y in range(self.height):
+                if (x, y) == self.agent_location:
+                    self.canvas[y][x] += "A"
                 if (x, y) == self.start_location:
-                    self.canvas[y][x] = "S"
+                    self.canvas[y][x] += "S"
                     continue
                 if (x, y) == self.wumpus_location:
                     self.canvas[y][x] += "W"
@@ -105,7 +108,7 @@ class WumpusWorld:
         stench = self.sense_stench()
         breeze = self.sense_breeze()
         glitter = self.sense_glitter()
-        bump = self.sense_bump(action)
+        bump = self.sense_bump()
         scream = self.sense_scream()
         reward = self.get_reward()
         self.percepts = {"stench": stench,
@@ -115,8 +118,6 @@ class WumpusWorld:
                         "scream": scream,
                         "reward": reward}
         return self.percepts
-        # Returns the percepts + the reward
-        # import code; code.interact(local=dict(globals(), **locals()))
     
     def get_reward(self):
         reward = 0
@@ -198,6 +199,7 @@ class WumpusWorld:
             self.percepts["scream"] = False
 
     def step(self, action):
+        self.get_percepts(action)
         self.num_actions += 1 
         if action == "forward":
             self.update_location(action)

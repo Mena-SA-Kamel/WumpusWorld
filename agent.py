@@ -17,7 +17,15 @@ height = 4
 allow_climb_without_gold = True
 pit_prob = 0.2
 game = environment.WumpusWorld(width, height, allow_climb_without_gold, pit_prob)
+game.visualize_game_canvas()
+print('\n\n')
 agent = NaiveAgent(game)
-percepts = game.get_percepts()
-action = agent.compute_next_action(percepts)
-game.step(action)
+while not game.terminate_game:
+    print(game.percepts)
+    action = agent.compute_next_action(game.percepts)
+    print(action, game.agent_location)
+    game.step(action)
+    game.visualize_game_canvas()
+    print('\n\n')
+
+
