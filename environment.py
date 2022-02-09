@@ -1,3 +1,10 @@
+###############################################################################################################
+#                                             Mena S.A. Kamel
+#                           3547-014: Intelligent Agents and Reinforcement Learning
+#                                              Assignment #1
+#                                             February 9, 2022                                   
+###############################################################################################################
+
 import numpy as np
 import os
 import random
@@ -50,6 +57,8 @@ class WumpusWorld:
         self.num_actions = 0
         # Creating the game canvas
         self.create_game_canvas()
+        # Flag used to make sure we penalize arrow shoot once
+        self.arrow_penalized = False
     
     def create_game_canvas(self):
         '''
@@ -192,21 +201,35 @@ class WumpusWorld:
                         "reward": reward}
         return self.percepts
     
-    def get_reward(self):
+    def check_wumpus_life(self):
         '''
-        Computes the current reward. This is not the cumulative reward
+        Checking if the Wumpus is still alive after an arrow is shot
         '''
-        reward = 0
-        if self.agent_has_gold and self.climb and self.agent_alive:
-            reward = 1000
-        if not self.agent_alive:
-            reward = -1000
-        action_penalty = -1
-        arrow_penalty = -10 * int(not(self.agent_has_arrow))
-        # Final reward is the sum of the win/loss reward + arrow use penalty + default action penalty
-        final_reward = reward + action_penalty + arrow_penalty
-        return final_reward
-    
+        wumpus_x, wumpus_y = self.wumpus_location
+        agent_x, agent_y = self.agent_location
+        if self.agent_heading == "right" and agent_y == wumpus_y and agent_x < wumpus_x:
+            # (A>)  W
+            self.wumpus_alive = False
+            self.percepts["scream"] = True 
+        elif self.agent_heading == "left" and agent_y == wumpus_y and agent_x > wumpus_x:
+            # W  (<A)
+            self.wumpus_alive = False
+            self.percepts["scream"] = True
+        elif self.agent_heading == "down" and agent_x == wumpus_x and agent_y > wumpus_y:
+            # (A˅)
+            #  W
+            self.wumpus_alive = False
+            self.percepts["scream"] = True
+        elif self.agent_heading == "up" and agent_x == wumpus_x and agent_y < wumpus_y:
+            #  W
+            # (A^)
+            self.wumpus_alive = False
+            self.percepts["scream"] = True
+        else:
+            # If all conditions not met, then the Wumpus is still alive and hence, not screaming
+            self.wumpus_alive = True
+            self.percepts["scream"] = False
+
     def update_location(self, action):
         '''
         Updates the agent location given an action
@@ -270,36 +293,23 @@ class WumpusWorld:
             else:
                 new_heading = headings[headings.index(self.agent_heading) + 1]
         self.agent_heading = new_heading
-
-    
-    def check_wumpus_life(self):
+ 
+    def get_reward(self):
         '''
-        Checking if the Wumpus is still alive after an arrow is shot
+        Computes the current reward. 
         '''
-        wumpus_x, wumpus_y = self.wumpus_location
-        agent_x, agent_y = self.agent_location
-        if self.agent_heading == "right" and agent_y == wumpus_y and agent_x < wumpus_x:
-            # (A>)  W
-            self.wumpus_alive = False
-            self.percepts["scream"] = True 
-        elif self.agent_heading == "left" and agent_y == wumpus_y and agent_x > wumpus_x:
-            # W  (<A)
-            self.wumpus_alive = False
-            self.percepts["scream"] = True
-        elif self.agent_heading == "down" and agent_x == wumpus_x and agent_y > wumpus_y:
-            # (A˅)
-            #  W
-            self.wumpus_alive = False
-            self.percepts["scream"] = True
-        elif self.agent_heading == "up" and agent_x == wumpus_x and agent_y < wumpus_y:
-            #  W
-            # (A^)
-            self.wumpus_alive = False
-            self.percepts["scream"] = True
-        else:
-            # If all conditions not met, then the Wumpus is still alive and hence, not screaming
-            self.wumpus_alive = True
-            self.percepts["scream"] = False
+        reward = 0
+        if self.agent_has_gold and self.climb and self.agent_alive:
+            reward = 1000
+        if not self.agent_alive:
+            reward = -1000
+        # Penalizing shooting the arrow
+        if not(self.agent_has_arrow) and not(self.arrow_penalized):
+            reward += -10
+            self.arrow_penalized = True
+        # Action penalty
+        reward += -1
+        return reward
 
     def step(self, action):
         '''
@@ -326,6 +336,10 @@ class WumpusWorld:
                     self.climb = True
             self.percepts["bump"] = False
         
+        # Moving gold with agent if the agent grabbed it
+        if self.agent_has_gold:
+            self.gold_location = self.agent_location
+
         if not self.agent_alive or self.climb:
             # Terminate the game if agent died or climbed
             self.terminate_game = True
