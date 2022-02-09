@@ -17,15 +17,56 @@ height = 4
 allow_climb_without_gold = True
 pit_prob = 0.2
 game = environment.WumpusWorld(width, height, allow_climb_without_gold, pit_prob)
+print('=================== GAME CANVAS ===================')
 game.visualize_game_canvas()
-print('\n\n')
+print('=================== START GAME ===================\n\n')
+
 agent = NaiveAgent(game)
 while not game.terminate_game:
-    print(game.percepts)
+    game.get_percepts()
+    print("PERCEPTS: ", game.percepts)
     action = agent.compute_next_action(game.percepts)
-    print(action, game.agent_location)
+    print("ACTION: ", action)
     game.step(action)
     game.visualize_game_canvas()
     print('\n\n')
 
+# # Code to test heading computation and bumps
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
+# action = "turn right"
+# print("ACTION: ", action)
+# game.step(action)
+# game.visualize_game_canvas()
+
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
+# action = "forward"
+# print("ACTION: ", action)
+# game.step(action)
+# game.visualize_game_canvas()
+
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
+# action = "turn right"
+# print("ACTION: ", action)
+# game.step(action)
+# game.visualize_game_canvas()
+
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
+# action = "turn left"
+# print("ACTION: ", action)
+# game.step(action)
+# game.visualize_game_canvas()
+
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
+# action = "forward"
+# print("ACTION: ", action)
+# game.step(action)
+# game.visualize_game_canvas()
+
+# game.get_percepts()
+# print("PERCEPTS: ", game.percepts)
 
