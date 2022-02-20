@@ -56,8 +56,7 @@ allow_climb_without_gold = True
 pit_prob = 0.2
 game = environment.WumpusWorld(width, height, allow_climb_without_gold, pit_prob)
 agent = NaiveAgent(game)
-# agent.play_game(visualize=True, verbose=True)
-import code; code.interact(local=dict(globals(), **locals()))
+agent.play_game(visualize=True, verbose=True)
 
 # # Code to test heading computation and bumps
 # game.get_percepts()
