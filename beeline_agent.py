@@ -1,8 +1,9 @@
 ###############################################################################################################
 #                                             Mena S.A. Kamel
 #                           3547-014: Intelligent Agents and Reinforcement Learning
-#                                              Assignment #1
-#                                             February 20, 2022                                   
+#                                              Assignment #2
+#                                             February 23, 2022      
+# Beeline agent uses an A* algorithm to navigate back to the home location when the Gold is picked up                             
 ###############################################################################################################
 
 from stringprep import b3_exceptions
@@ -16,21 +17,37 @@ class BeelineAgent:
         Initializes a Naive Agent
         '''
         self.game = game
-        # Initial agent heading and location (belief state)
         self.home_location = (0, 0)
-        self.location = (0, 0)
+
+        # Initializing Agent belief state
+        self.location = self.home_location
         self.heading = "right"
         self.has_gold = False
         self.safe_locations = set([self.location])
         
+        # Defining A* algorithm parameters
+
+        # Defining infinity cost as an integer approximation
         self.infinity_cost = 999999
+
+        # Heuristic used is the Euclidean distance. heurist_matrix is a matrix storing
+        # the Euclidean distance from each box to the home_location
         self.heurist_matrix = self.compute_heuristic_matrix()
     
     def compute_heuristic_matrix(self):
+        '''
+        Computes the Euclidean distance from each box in the grid to the home location
+        '''
+        # Initializing the matrix to zeros
         heuristic_matrix = np.zeros((self.game.height, self.game.width))
+
+        # Looping through all the boxes
         for x in range(self.game.width):
             for y in range(self.game.height):
+                # Defining the current box we are in
                 curr_location = np.array([y, x])
+                
+                # Computing the norm / Eulidean distance from the current location to the home location
                 heuristic_matrix[y, x] = np.linalg.norm(curr_location - self.home_location)
         return heuristic_matrix
 
@@ -39,13 +56,20 @@ class BeelineAgent:
         Computes the next best action to take give the percepts. 
         Percepts not used for now, picks the action at random
         '''
+        # If agent senses glitter and does not have the gold, grab the gold and update the belief state
         if percepts["glitter"] and not self.has_gold:
             action = "grab"
             self.has_gold = True
+
+         # If agent is at the home location and has the gold, climb
         elif self.location == (0,0) and self.has_gold:
             action = "climb"
+
+        # If agent is not at the home location, but has the gold, navigate back using A*
         elif self.location != (0,0) and self.has_gold:
             action = self.navigate_back()
+
+        # Otherwise, pick an action at random
         else:
             actions_to_choose_from = game.actions.copy()
             actions_to_choose_from.remove('grab')
@@ -108,11 +132,22 @@ class BeelineAgent:
         self.heading = new_heading
     
     def update_safe_locations(self):
+        '''
+        Adding current location to the list of safe locations
+        '''
         self.safe_locations.add(self.location)
 
     def update_belief_state(self, action):
+        '''
+        Updates the agent belief state
+        '''
+        # Updating believed location
         self.update_location(action)
+
+        # Updating believed heading
         self.update_heading(action)
+
+        # Updating believed safe locations
         self.update_safe_locations()
     
     def get_adjacent_squares(self):
@@ -129,33 +164,51 @@ class BeelineAgent:
         return adjacent_squares, headings
 
     def navigate_back(self):
+        '''
+        Function that determines the next action to take in order to navigate 
+        back to the home location
+        '''
+        # Getting the heuristic matrix
         heuristic_matrix = self.heurist_matrix.copy()
+
+        # Getting the 4 adjacent boxes to where the agent is in
         adjacent_squares, headings = self.get_adjacent_squares()
-        actions = []
+
+        # Defining a list to store the costs of going to the adjacent boxes
         square_costs = np.zeros(4)
+
+        # Looping through the adjacent squares
         for i, adjacent_square in enumerate(adjacent_squares):
             x, y = adjacent_square
+            # If the adjacent box is within the grid
             if 0 <= x < self.game.width and 0 <= y < self.game.height:
+                # Total cost is the cost of going to the adjacent box PLUS the heuristic cost (distance to home)
+
+                # Getting the heuristic cost
                 heuristic_cost = heuristic_matrix[adjacent_square]
+
+                # Getting the cost of going to the adjacent box (1 if it is safe, infinity if it has a Wumpus or Pit)
                 cost = 1 if adjacent_square in self.safe_locations else self.infinity_cost
                 square_costs[i] = cost + heuristic_cost
+
+            # If the adjacent box is outside the grid, we give a very large cost to stop the agent from going there
             else:
-                square_costs[i] = self.infinity_cost
+                square_costs[i] = 2*self.infinity_cost
+        
+        # Choosing the best box to go to next as the one with the minimum cost
         best_next_box_ix = np.argmin(square_costs)
+        # Getting the heading required to go to that desired box
         desired_heading = headings[best_next_box_ix]
+
         # Need to go to the best_next_box: First change heading to point there, then go forward
+        print(self.heading, desired_heading)
         if self.heading != desired_heading:
+            # turn right until our desired heading equals our current heading
             action = "turn right"
         else:
             action = "forward"
+        import code; code.interact(local=dict(globals(), **locals()))
         return action
-    
-        
-        
-        
-        # Need to get the cost of going to the adjacent boxes
-            # if adjacent box has Wumpus or Pit, cost = 10000
-            # else, cost = 0
 
     def play_game(self, visualize=False, verbose=False):
         '''
@@ -167,7 +220,7 @@ class BeelineAgent:
             print('======================== GAME CANVAS ========================')
             self.game.visualize_game_canvas()
             print('======================== START GAME ========================\n\n')
-    
+        
         while not self.game.terminate_game:
             # Agent queries the environment for percepts
             self.game.get_percepts()
@@ -181,6 +234,7 @@ class BeelineAgent:
                 print("NAVIGATING BACK")
             game.visualize_game_canvas()
             print('\n\n') if verbose else ""
+        print("TERMINATED GAME")
         print("FINAL PERCEPTS: ", percepts) if verbose else ""
 
 
@@ -191,44 +245,6 @@ allow_climb_without_gold = True
 pit_prob = 0.2
 game = environment.WumpusWorld(width, height, allow_climb_without_gold, pit_prob)
 agent = BeelineAgent(game)
+
+# Test logic by setting agent location to gold location at first
 agent.play_game(visualize=True, verbose=True)
-
-# # Code to test heading computation and bumps
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-# action = "turn right"
-# print("ACTION: ", action)
-# game.step(action)
-# game.visualize_game_canvas()
-
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-# action = "forward"
-# print("ACTION: ", action)
-# game.step(action)
-# game.visualize_game_canvas()
-
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-# action = "turn right"
-# print("ACTION: ", action)
-# game.step(action)
-# game.visualize_game_canvas()
-
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-# action = "turn left"
-# print("ACTION: ", action)
-# game.step(action)
-# game.visualize_game_canvas()
-
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-# action = "forward"
-# print("ACTION: ", action)
-# game.step(action)
-# game.visualize_game_canvas()
-
-# game.get_percepts()
-# print("PERCEPTS: ", game.percepts)
-

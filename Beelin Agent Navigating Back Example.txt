@@ -1,0 +1,276 @@
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': False, 'bump': False, 'scream': False, 'reward': -1}
+ACTION:  forward
+-----------------------------------------------------------------
+|               |               |       (A>)G   |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+ACTION:  grab
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |       (A>)G   |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+right left
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z    
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |       (A˅)G   |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+down left
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |       (A<)G   |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+left left
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  forward
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |       (A<)G   |               |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+left down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |       (A˄)G   |               |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+up down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |       (A>)G   |               |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+right down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |       (A˅)G   |               |               |
+|               |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+down down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  forward
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|               |       (A˅)G   |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+down left
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|               |       (A<)G   |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+left left
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  forward
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|       (A<)G   |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+left down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|       (A˄)G   |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+up down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|       (A>)G   |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+right down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> ^Z
+
+now exiting InteractiveConsole...
+ACTION:  turn right
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|       (A˅)G   |               |               |               |
+|               |               |               |               |
+|       S       |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': False, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+down down
+Python 3.9.7 (default, Sep 16 2021, 16:59:28) [MSC v.1916 64 bit (AMD64)] on win32
+|               |               |               |               |
+|       (A˅)S   |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+PERCEPTS:  {'stench': False, 'breeze': True, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}
+ACTION:  climb
+NAVIGATING BACK
+-----------------------------------------------------------------
+|               |               |               |               |
+|               |               |               |               |
+|               |               |               |               |
+|       (A˅)S   |       P       |       P       |       W       |
+-----------------------------------------------------------------
+
+
+
+TERMINATED GAME
+FINAL PERCEPTS:  {'stench': False, 'breeze': True, 'glitter': True, 'bump': False, 'scream': False, 'reward': -1}

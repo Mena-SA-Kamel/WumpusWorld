@@ -100,6 +100,7 @@ class WumpusWorld:
         G: Gold
         W: Wumpus
         '''
+        print("-----------------------------------------------------------------")
         self.canvas = np.tile("", (self.height, self.width)).tolist()
         for x in range(self.width):
             for y in range(self.height):
@@ -114,11 +115,12 @@ class WumpusWorld:
                     self.canvas[y][x] += "G"
                 if (x, y) in self.pit_locations:
                     self.canvas[y][x] += "P"
-        for y in range(self.height-1, -1, -1):
+        for k in range(self.height-1, -1, -1):
             row = "|\t"
-            for x in range(self.width):
-                row += (self.canvas[y][x] + "\t|\t")
+            for j in range(self.width):
+                row += (self.canvas[k][j] + "\t|\t")
             print(row)
+        print("-----------------------------------------------------------------")
     
     def get_heading_symbol(self):
         '''
