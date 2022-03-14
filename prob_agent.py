@@ -27,36 +27,28 @@ class ProbAgent:
         self.has_gold = False
         self.safe_locations = set([self.location])
 
-        # Defining Wumpus Probability Model
-        num_boxes = 15.
-        wumpus = DiscreteDistribution({
-        "1_2": 1/num_boxes, "1_3": 1/num_boxes, "1_4": 1/num_boxes,
-        "2_1": 1/num_boxes, "2_2": 1/num_boxes, "2_3": 1/num_boxes, "2_4": 1/num_boxes,
-        "3_1": 1/num_boxes, "3_2": 1/num_boxes, "3_3": 1/num_boxes, "3_4": 1/num_boxes,
-        "4_1": 1/num_boxes, "4_2": 1/num_boxes, "4_3": 1/num_boxes, "4_4": 1/num_boxes
-        })
+        self.stench_wumpus_model = self.create_stench_wumpus_model()
 
-        stenches = {}
-        for x in list(range(1,5)):
-            for y in list(range(1,5)):
-                if [x,y] == [1,1]:
-                    continue
-                affected_boxes = self.get_surrounding_boxes([x, y])
-                affected_boxes.append((x, y))
-                state_changes = []
-                for i in list(range(1,5)):
-                    for j in list(range(1,5)):
-                        if [i,j] == [1,1]:
-                            continue
-                        box_name = "{}_{}".format(i,j)
-                        if (i,j) in affected_boxes:
-                            state_changes.append([box_name, "True", 1.0])
-                            state_changes.append([box_name, "False", 0.0])
-                        else:
-                            state_changes.append([box_name, "True", 0.0])
-                            state_changes.append([box_name, "False", 1.0])
-                stenches["stench_{}_{}".format(x,y)] = ConditionalProbabilityTable(state_changes, [wumpus])
+        self.breeze_pit_model, breeze_pit_states = self.create_breeze_pit_model()
 
+        results = self.breeze_pit_model.predict_proba([{
+            'breeze_2_1':"True",
+            'breeze_2_3':"True",
+            'breeze_1_2':"True",
+            'breeze_3_2':"True",
+            'breeze_1_3':"False"}])
+        dict(zip(breeze_pit_states, results[0]))
+
+
+        # Defining A* algorithm parameters
+        # Defining infinity cost as an integer approximation
+        self.infinity_cost = 999999
+
+        # Heuristic used is the Euclidean distance. heurist_matrix is a matrix storing
+        # the Euclidean distance from each box to the home_location
+        self.heurist_matrix = self.compute_heuristic_matrix()
+
+    def create_breeze_pit_model(self):
         pits = {}
         pit_probability = 0.2
         for x in list(range(1,5)):
@@ -117,32 +109,65 @@ class ProbAgent:
             pit_breeze_model.add_edge(pit_state, breeze_state)
 
         pit_breeze_model.bake()
+        return pit_breeze_model, state_names
 
-        results = pit_breeze_model.predict_proba([{
-            'breeze_2_1':"True",
-            'breeze_2_3':"True",
-            'breeze_1_2':"True",
-            'breeze_3_2':"True",
-            'breeze_1_3':"False"}])
-        dict(zip(state_names, results[0]))
+    def create_stench_wumpus_model(self):
+        # Defining Wumpus Probability Model
+        num_boxes = 15.
+        wumpus = DiscreteDistribution({
+        "1_2": 1/num_boxes, "1_3": 1/num_boxes, "1_4": 1/num_boxes,
+        "2_1": 1/num_boxes, "2_2": 1/num_boxes, "2_3": 1/num_boxes, "2_4": 1/num_boxes,
+        "3_1": 1/num_boxes, "3_2": 1/num_boxes, "3_3": 1/num_boxes, "3_4": 1/num_boxes,
+        "4_1": 1/num_boxes, "4_2": 1/num_boxes, "4_3": 1/num_boxes, "4_4": 1/num_boxes
+        })
+
+        stenches = {}
+        edges = []
+        for x in list(range(1,5)):
+            for y in list(range(1,5)):
+                if [x,y] == [1,1]:
+                    continue
+                affected_boxes = self.get_surrounding_boxes([x, y])
+                affected_boxes.append((x, y))
+                state_changes = []
+                edges.append(["wumpus", "stench_{}_{}".format(x,y)])
+                for i in list(range(1,5)):
+                    for j in list(range(1,5)):
+                        if [i,j] == [1,1]:
+                            continue
+                        box_name = "{}_{}".format(i,j)
+                        if (i,j) in affected_boxes:
+                            state_changes.append([box_name, "True", 1.0])
+                            state_changes.append([box_name, "False", 0.0])
+                        else:
+                            state_changes.append([box_name, "True", 0.0])
+                            state_changes.append([box_name, "False", 1.0])
+                stenches["stench_{}_{}".format(x,y)] = ConditionalProbabilityTable(state_changes, [wumpus])
+
+        stench_state_names = []
+        stench_states = {}
+        for stench in stenches.keys():
+            stench_states[stench] = State(stenches[stench], name=stench)
+            stench_state_names.append(stench)
+
+        stench_state_names.append("wumpus")
+        wumpus_state = State(wumpus, name="wumpus")
+        stench_wumpus_model = BayesianNetwork("Wumpus_Stench")
+        states = list(stench_states.values()) + [wumpus_state]
+
+        stench_wumpus_model.add_states(*states)
+        for edge in edges:
+            stench_wumpus_model.add_edge(wumpus_state, stench_states[edge[1]])
+
+        stench_wumpus_model.bake()
+
+        results = stench_wumpus_model.predict_proba([{
+            'stench_2_2':"True",
+            'stench_2_1':"False"}])
+        dict(zip(stench_state_names, results[0]))
+
+
         import code; code.interact(local=dict(globals(), **locals()))
-
-
-
-
-
-
-
-
-
-
-        # Defining A* algorithm parameters
-        # Defining infinity cost as an integer approximation
-        self.infinity_cost = 999999
-
-        # Heuristic used is the Euclidean distance. heurist_matrix is a matrix storing
-        # the Euclidean distance from each box to the home_location
-        self.heurist_matrix = self.compute_heuristic_matrix()
 
     def compute_heuristic_matrix(self):
         '''
