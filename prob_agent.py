@@ -26,19 +26,14 @@ class ProbAgent:
         self.heading = "right"
         self.has_gold = False
         self.safe_locations = set([self.location])
+        self.breezes = {}
+        self.stenches = {}
 
-        self.stench_wumpus_model = self.create_stench_wumpus_model()
+        self.stench_wumpus_model, self.stench_wumpus_states = self.create_stench_wumpus_model()
 
-        self.breeze_pit_model, breeze_pit_states = self.create_breeze_pit_model()
+        self.breeze_pit_model, self.breeze_pit_states = self.create_breeze_pit_model()
 
-        results = self.breeze_pit_model.predict_proba([{
-            'breeze_2_1':"True",
-            'breeze_2_3':"True",
-            'breeze_1_2':"True",
-            'breeze_3_2':"True",
-            'breeze_1_3':"False"}])
-        dict(zip(breeze_pit_states, results[0]))
-
+        self.risk_thresh = 0.49
 
         # Defining A* algorithm parameters
         # Defining infinity cost as an integer approximation
@@ -47,6 +42,14 @@ class ProbAgent:
         # Heuristic used is the Euclidean distance. heurist_matrix is a matrix storing
         # the Euclidean distance from each box to the home_location
         self.heurist_matrix = self.compute_heuristic_matrix()
+
+        # results = self.breeze_pit_model.predict_proba([{
+        #     'breeze_2_1':"True",
+        #     'breeze_2_3':"True",
+        #     'breeze_1_2':"True",
+        #     'breeze_3_2':"True",
+        #     'breeze_1_3':"False"}])
+        # dict(zip(breeze_pit_states, results[0]))
 
     def create_breeze_pit_model(self):
         pits = {}
@@ -115,18 +118,16 @@ class ProbAgent:
         # Defining Wumpus Probability Model
         num_boxes = 15.
         wumpus = DiscreteDistribution({
-        "1_2": 1/num_boxes, "1_3": 1/num_boxes, "1_4": 1/num_boxes,
-        "2_1": 1/num_boxes, "2_2": 1/num_boxes, "2_3": 1/num_boxes, "2_4": 1/num_boxes,
-        "3_1": 1/num_boxes, "3_2": 1/num_boxes, "3_3": 1/num_boxes, "3_4": 1/num_boxes,
-        "4_1": 1/num_boxes, "4_2": 1/num_boxes, "4_3": 1/num_boxes, "4_4": 1/num_boxes
+        "wumpus_1_2": 1/num_boxes, "wumpus_1_3": 1/num_boxes, "wumpus_1_4": 1/num_boxes,
+        "wumpus_2_1": 1/num_boxes, "wumpus_2_2": 1/num_boxes, "wumpus_2_3": 1/num_boxes, "wumpus_2_4": 1/num_boxes,
+        "wumpus_3_1": 1/num_boxes, "wumpus_3_2": 1/num_boxes, "wumpus_3_3": 1/num_boxes, "wumpus_3_4": 1/num_boxes,
+        "wumpus_4_1": 1/num_boxes, "wumpus_4_2": 1/num_boxes, "wumpus_4_3": 1/num_boxes, "wumpus_4_4": 1/num_boxes
         })
 
         stenches = {}
         edges = []
         for x in list(range(1,5)):
             for y in list(range(1,5)):
-                if [x,y] == [1,1]:
-                    continue
                 affected_boxes = self.get_surrounding_boxes([x, y])
                 affected_boxes.append((x, y))
                 state_changes = []
@@ -135,7 +136,7 @@ class ProbAgent:
                     for j in list(range(1,5)):
                         if [i,j] == [1,1]:
                             continue
-                        box_name = "{}_{}".format(i,j)
+                        box_name = "wumpus_{}_{}".format(i,j)
                         if (i,j) in affected_boxes:
                             state_changes.append([box_name, "True", 1.0])
                             state_changes.append([box_name, "False", 0.0])
@@ -160,14 +161,7 @@ class ProbAgent:
             stench_wumpus_model.add_edge(wumpus_state, stench_states[edge[1]])
 
         stench_wumpus_model.bake()
-
-        results = stench_wumpus_model.predict_proba([{
-            'stench_2_2':"True",
-            'stench_2_1':"False"}])
-        dict(zip(stench_state_names, results[0]))
-
-
-        import code; code.interact(local=dict(globals(), **locals()))
+        return stench_wumpus_model, stench_state_names
 
     def compute_heuristic_matrix(self):
         '''
@@ -209,8 +203,63 @@ class ProbAgent:
             actions_to_choose_from = game.actions.copy()
             actions_to_choose_from.remove('grab')
             actions_to_choose_from.remove('climb')
-            action = random.choice(actions_to_choose_from)
+            x, y = self.location
+            if self.percepts['stench']:
+                self.stenches["stench_{}_{}".format(x+1, y+1)] = "True"
+            if self.percepts['breeze']:
+                self.breezes["breeze_{}_{}".format(x+1, y+1)] = "True"
+
+
+            pit_probabilities = self.compute_pit_probability()
+            wumpus_probabilities = self.compute_wumpus_probability()
+
+
+            adjacent_squares, headings = self.get_adjacent_squares()
+            safe_boxes = []
+            total_box_risks = []
+            safe_boxes_headings = []
+            for ix, adjacent_square in enumerate(adjacent_squares):
+                i, j = adjacent_square
+                if 0 < i < self.game.width and 0 < j < self.game.height:
+                    pit_prob = pit_probabilities['pit_{}_{}'.format(i+1,j+1)]
+                    wumpus_prob = wumpus_probabilities['wumpus_{}_{}'.format(i+1,j+1)]
+                    if pit_prob < self.risk_thresh and wumpus_prob < self.risk_thresh :
+                        safe_boxes.append((i+1, j+1))
+                        total_box_risks.append(pit_prob + wumpus_prob)
+                        safe_boxes_headings.append(headings[ix])
+            if len(total_box_risks) == 0:
+                action = self.navigate_back()
+            else:
+                safest_location = safe_boxes[np.argmin(total_box_risks)]
+                safest_heading = safe_boxes_headings[np.argmin(total_box_risks)]
+                # Need to go to safest_location
+                if self.heading != safest_heading:
+                    # turn right until our desired heading equals our current heading
+                    action = "turn right"
+                else:
+                    action = "forward"
         return action
+
+    def compute_pit_probability(self):
+        pit_probs = self.breeze_pit_model.predict_proba([self.breezes])
+        prob = {}
+        for i, entry in enumerate(pit_probs[0]):
+            state_name = self.breeze_pit_states[i]
+            if 'breeze' in state_name:
+                continue
+            prob[state_name] = entry.to_dict()["parameters"][0]["True"]
+        return prob
+
+    def compute_wumpus_probability(self):
+        stench_probs = self.stench_wumpus_model.predict_proba([self.stenches])
+        prob = {}
+        for i, entry in enumerate(stench_probs[0]):
+            state_name = self.stench_wumpus_states[i]
+            if 'stench' in state_name:
+                continue
+            prob[state_name] = entry.to_dict()["parameters"]
+        return prob['wumpus'][0]
+
 
     def update_location(self, action):
         '''
@@ -354,7 +403,6 @@ class ProbAgent:
             action = "turn right"
         else:
             action = "forward"
-        import code; code.interact(local=dict(globals(), **locals()))
         return action
 
     def play_game(self, visualize=False, verbose=False):
@@ -371,8 +419,8 @@ class ProbAgent:
         while not self.game.terminate_game:
             # Agent queries the environment for percepts
             self.game.get_percepts()
-            percepts = self.game.percepts
-            print("PERCEPTS: ", percepts) if verbose else ""
+            self.percepts = self.game.percepts
+            print("PERCEPTS: ", self.percepts) if verbose else ""
             action = agent.compute_next_action(game.percepts)
             print("ACTION: ", action) if verbose else ""
             game.step(action)
@@ -382,7 +430,7 @@ class ProbAgent:
             game.visualize_game_canvas()
             print('\n\n') if verbose else ""
         print("TERMINATED GAME")
-        print("FINAL PERCEPTS: ", percepts) if verbose else ""
+        print("FINAL PERCEPTS: ", self.percepts) if verbose else ""
 
 
 
